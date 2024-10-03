@@ -1,0 +1,1 @@
+# Mag7-BollingerBands-ATR-Strategy
