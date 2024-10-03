@@ -7,7 +7,7 @@ This project evaluates the performance of seven key stocks in the US stock marke
 ## Project Structure
 
 ```
-- data_pulling.oy         # Python file to pull Mag7 historical data from yfinance
+- data_pulling.py         # Python file to pull Mag7 historical data from yfinance
 - get_portfolio.py        # Core script for running the backtest and generating the portfolio
 - evaluation_metrics.py   # Python file to store portfolio evaluation metrics
 - data/                   # Folder to store historical price data (fetched using Yahoo Finance API)
@@ -51,13 +51,13 @@ The Double Bollinger Bands (DBB) strategy is used to generate buy and sell signa
 
 ### 2. Risk Based Position Sizing using ATR
 
-   \[
-   \text{Position Size} = \frac{\text{Risk Capital}}{\text{ATR}}
-   \]
+   $$
+    \text{Position Size} = \frac{\text{Risk Capital}}{\text{ATR}}
+    $$
    Where the risk capital is defined as:
-   \[
-   \text{Risk Capital} = \text{Risk Factor} \times \text{Portfolio Value}
-   \]
+   $$
+   \text{Risk Capital} = \text{Risk Factor} \times \text{Cash Value}
+   $$
 
 The Average True Range (ATR) risk position sizing strategy uses the ATR indicator to dynamically determine the number of shares to buy or sell based on market volatility. The ATR measures the average volatility over a specified period, giving an indication of how much a stock typically moves during that time. This volatility-adjusted position sizing ensures that trades are adjusted according to the current market risk.
 
@@ -100,3 +100,5 @@ python get_portfolio.py
 This will perform the backtest on the Magnificent 7 stocks using the DBB + ATR strategy and save the portfolio in the `portfolio_versions/` folder.
 
 Feel free to reach out with any questions or suggestions for improvements!
+
+
