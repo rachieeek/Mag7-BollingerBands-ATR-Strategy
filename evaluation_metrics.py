@@ -72,9 +72,6 @@ def sharpe_ratio(portfolio, risk_free_rate_df):
 
     daily_risk_free_rate = portfolio['Close'] / 252
 
-    print(daily_returns)
-    print(daily_risk_free_rate)
-
     excess_returns = daily_returns - daily_risk_free_rate
 
     annual_sharpe_ratio = (excess_returns.mean() / excess_returns.std()) * np.sqrt(252)
