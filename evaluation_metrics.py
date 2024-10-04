@@ -67,7 +67,6 @@ def sharpe_ratio(portfolio, risk_free_rate_df):
     portfolio.index = pd.to_datetime(portfolio.index)
     portfolio = portfolio.join(risk_free_rate_df['Close'], how='left')
 
-
     daily_returns = portfolio['Total'].pct_change() *100
 
     daily_risk_free_rate = portfolio['Close'] / 252
@@ -83,7 +82,8 @@ def sortino_ratio(portfolio, risk_free_rate_df):
     Calculate the Sortino ratio of the portfolio.
 
     Parameters:
-    portfolio (pd.DataFrame): The portfolio DataFrame.
+    portfolio (pd.DataFrame): The portfolio DataFrame with a 'Date' column and 'Total' value.
+    risk_free_rate_df (pd.DataFrame): DataFrame containing risk-free rate for each day (daily rates).
 
     Returns:
     float: The Sortino ratio of the portfolio.
@@ -95,9 +95,17 @@ def sortino_ratio(portfolio, risk_free_rate_df):
 
     daily_returns = portfolio['Total'].pct_change() * 100
 
-    downside_returns = daily_returns[daily_returns < 0]
-    sortino_ratio = (daily_returns.mean() - 0.02) / downside_returns.std()
+    daily_risk_free_rate = portfolio['Close'] / 252
+
+    excess_returns = daily_returns - daily_risk_free_rate
+
+    downside_returns = excess_returns[excess_returns < 0]
+    downside_deviation = downside_returns.std()
+
+    sortino_ratio = (excess_returns.mean()) / downside_deviation
+
     return sortino_ratio
+
 
 def max_drawdown(portfolio):
     '''
