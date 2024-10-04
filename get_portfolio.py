@@ -21,15 +21,6 @@ def get_data_files(data_folder='data'):
         data_dict[ticker] = data
     return data_dict
 
-def calculate_rsi(data, window=20):
-    delta = data['Close'].diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
-    rs = gain / loss
-    rsi = 100 - (100 / (1 + rs))
-    data['RSI'] = rsi
-    return data
-
 def calculate_bollinger_bands(data, window=20, num_std=2):
     data['SMA'] = data['Close'].rolling(window=window).mean()
     data['STD'] = data['Close'].rolling(window=window).std()
@@ -39,19 +30,30 @@ def calculate_bollinger_bands(data, window=20, num_std=2):
     data['Lower Band 2'] = data['SMA'] - (data['STD'] * num_std * 2)
     return data
 
-def calculate_MACD(data, short_window=12, long_window=26, signal_window=9):
-    data['Short EMA'] = data['Close'].ewm(span=short_window, adjust=False).mean()
-    data['Long EMA'] = data['Close'].ewm(span=long_window, adjust=False).mean()
-    data['MACD'] = data['Short EMA'] - data['Long EMA']
-    data['Signal Line'] = data['MACD'].ewm(span=signal_window, adjust=False).mean()
-    return data
-
 def calculate_ATR(data, window=14):
     data['H-L'] = abs(data['High'] - data['Low'])
     data['H-PC'] = abs(data['High'] - data['Close'].shift(1))
     data['L-PC'] = abs(data['Low'] - data['Close'].shift(1))
     data['TR'] = data[['H-L', 'H-PC', 'L-PC']].max(axis=1)
     data['ATR'] = data['TR'].rolling(window=window).mean()
+    return data
+
+# included rsi and macd to pair with bollinger bands. however, they are not used in the final implementation as backtesting with
+# these indicators did not yield better results
+def calculate_rsi(data, window=20):
+    delta = data['Close'].diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
+    rs = gain / loss
+    rsi = 100 - (100 / (1 + rs))
+    data['RSI'] = rsi
+    return data
+
+def calculate_MACD(data, short_window=12, long_window=26, signal_window=9):
+    data['Short EMA'] = data['Close'].ewm(span=short_window, adjust=False).mean()
+    data['Long EMA'] = data['Close'].ewm(span=long_window, adjust=False).mean()
+    data['MACD'] = data['Short EMA'] - data['Long EMA']
+    data['Signal Line'] = data['MACD'].ewm(span=signal_window, adjust=False).mean()
     return data
 
 def generate_signals(data, additional_indicators=[]):
