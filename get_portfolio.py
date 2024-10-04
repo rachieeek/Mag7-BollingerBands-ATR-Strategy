@@ -119,7 +119,7 @@ def generate_portfolio(data_dict, beginning_value=10000, start_date='2013-01-01'
             portfolio.loc[current_date, 'Holding Value'] = holding_value
             portfolio.loc[current_date, 'Total'] = cash_value + holding_value
             break
-        
+
         for ticker, data in data_dict.items():
             if current_date in data.index[:-1]:
                 current_price = data.loc[current_date, 'Close'] 
@@ -163,11 +163,13 @@ def main():
     data_dict = get_data_files()
     portfolio = generate_portfolio(data_dict)
 
-    print("Portfolio Summary:")
-    print(evaluation_metrics.evaluate_portfolio(portfolio))
-
     print("\nFinal Portfolio Value:")
     print(portfolio.iloc[-1])
+
+    print("Portfolio Summary:")
+    portfolio_metrics = evaluation_metrics.evaluate_portfolio(portfolio)
+    for metric, value in portfolio_metrics.items():
+        print(f"{metric}: {value:.4f}")
 
     if os.path.exists('portfolio_versions/portfolio.csv'):
         os.remove('portfolio_versions/portfolio.csv')
