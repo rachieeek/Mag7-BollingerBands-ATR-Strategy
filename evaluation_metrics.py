@@ -67,9 +67,13 @@ def sharpe_ratio(portfolio, risk_free_rate_df):
     portfolio.index = pd.to_datetime(portfolio.index)
     portfolio = portfolio.join(risk_free_rate_df['Close'], how='left')
 
-    daily_returns = portfolio['Total'].pct_change()
+
+    daily_returns = portfolio['Total'].pct_change() *100
 
     daily_risk_free_rate = portfolio['Close'] / 252
+
+    print(daily_returns)
+    print(daily_risk_free_rate)
 
     excess_returns = daily_returns - daily_risk_free_rate
 
@@ -92,7 +96,8 @@ def sortino_ratio(portfolio, risk_free_rate_df):
     portfolio.index = pd.to_datetime(portfolio.index)
     portfolio = portfolio.join(risk_free_rate_df['Close'], how='left')
 
-    daily_returns = portfolio['Total'].pct_change()
+    daily_returns = portfolio['Total'].pct_change() * 100
+
     downside_returns = daily_returns[daily_returns < 0]
     sortino_ratio = (daily_returns.mean() - 0.02) / downside_returns.std()
     return sortino_ratio
@@ -141,7 +146,6 @@ def evaluate_portfolio(portfolio):
     return evaluation_metrics
 
 def main():
-    # get portfolio to evaluate
     portfolio = pd.read_csv('portfolio_versions/portfolio.csv')
     portfolio.rename(columns={'Unnamed: 0': 'Date'}, inplace=True)
     portfolio['Date'] = pd.to_datetime(portfolio['Date'])
