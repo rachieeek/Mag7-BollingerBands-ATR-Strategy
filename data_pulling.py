@@ -1,9 +1,20 @@
 import yfinance
 import os
+import pandas as pd
 
 '''
 This module is responsible for pulling data from Yahoo Finance API, and calculating the technical indicator needed for analysis.
 '''
+
+def get_risk_free_rate(start_date, end_date):
+    '''
+    Get the risk-free rate for each day from yfinance
+    '''
+
+    risk_free_rate = yfinance.download('^IRX', start=start_date, end=end_date)
+    risk_free_rate = risk_free_rate.resample('D').ffill()
+
+    return risk_free_rate
 
 def get_stock_data(ticker, start_date, end_date):
     stock_data = yfinance.download(ticker, start=start_date, end=end_date)
