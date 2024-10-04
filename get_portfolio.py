@@ -69,11 +69,12 @@ def generate_signals(data, additional_indicators=[]):
         data['Sell Signal'] = (data['Close'] > data['Upper Band']) & (data['Close'] < data['Upper Band 2']) & (data['MACD'] < data['Signal Line']) & (data['MACD'].shift(1) > data['Signal Line'].shift(1))
     return data
 
-def generate_portfolio(data_dict, beginning_value=10000, start_date='2013-01-01', end_date='2023-12-31', position_sizing='risk', risk_factor=0.0035, additional_indicators=[]):
+def generate_portfolio(data_dict, beginning_value=10000, start_date='2013-01-01', end_date='2023-12-31', position_sizing='risk', risk_factor=0.0085, additional_indicators=[]):
     start_date = pd.to_datetime(start_date)
     end_date = pd.to_datetime(end_date)
 
-    date_range = pd.date_range(start=start_date, end=end_date)
+    # date range get index of all trading days between start and end date
+    date_range = data_dict[list(data_dict.keys())[0]].loc[start_date:end_date].index
 
     columns = ['Cash Value', 'Holding Value', 'Total'] + list(data_dict.keys())
     portfolio = pd.DataFrame(index=date_range, columns=columns)
@@ -98,6 +99,7 @@ def generate_portfolio(data_dict, beginning_value=10000, start_date='2013-01-01'
             continue
 
     for i in range(1, len(portfolio)):
+        
         current_date = portfolio.index[i]
         prev_date = portfolio.index[i-1]
 
@@ -106,6 +108,18 @@ def generate_portfolio(data_dict, beginning_value=10000, start_date='2013-01-01'
         cash_value = portfolio.loc[prev_date, 'Cash Value']
         holding_value = 0
 
+        # if last day of index
+        if current_date == portfolio.index[-1]:
+            for ticker, data in data_dict.items():
+                current_price = data.loc[current_date, 'Close']
+                current_holdings = portfolio.loc[current_date, ticker]
+                holding_value += current_holdings * current_price
+
+            portfolio.loc[current_date, 'Cash Value'] = cash_value
+            portfolio.loc[current_date, 'Holding Value'] = holding_value
+            portfolio.loc[current_date, 'Total'] = cash_value + holding_value
+            break
+        
         for ticker, data in data_dict.items():
             if current_date in data.index[:-1]:
                 current_price = data.loc[current_date, 'Close'] 
@@ -132,15 +146,16 @@ def generate_portfolio(data_dict, beginning_value=10000, start_date='2013-01-01'
 
                     portfolio.loc[current_date:, ticker] -= shares_to_sell
                     cash_value += shares_to_sell * next_day_open
-                holding_value += portfolio.loc[current_date, ticker] * next_day_open
+
+            holding_value += portfolio.loc[current_date, ticker] * current_price
 
         portfolio.loc[current_date, 'Cash Value'] = cash_value
         portfolio.loc[current_date, 'Holding Value'] = holding_value
         portfolio.loc[current_date, 'Total'] = cash_value + holding_value
 
-    portfolio.iloc[:, -6:] = portfolio.iloc[:, -6:].astype(int)
+    portfolio.iloc[:, -7:] = portfolio.iloc[:, -7:].astype(int)
 
-    portfolio.iloc[:, :-6] = portfolio.iloc[:, :-6].round(2)    
+    portfolio.iloc[:, :-7] = portfolio.iloc[:, :-7].round(2)    
 
     return portfolio
 
@@ -161,7 +176,7 @@ def main():
 
     initial_value = portfolio.iloc[1]['Total']
     final_value = portfolio.iloc[-1]['Total']
-    total_return = (final_value - initial_value) / initial_value * 100
+    total_return = ((final_value - initial_value) / initial_value ) * 100
     print(f"\nTotal Return: {total_return:.2f}%")
 
 if __name__ == '__main__':
